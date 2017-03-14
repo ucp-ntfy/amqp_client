@@ -24,6 +24,7 @@
 -export([start_link/5, connect/1, open_channel/3, hard_error_in_channel/3,
          channel_internal_error/3, server_misbehaved/2, channels_terminated/1,
          close/3, server_close/2, info/2, info_keys/0, info_keys/1]).
+-export([created_at/2, destroyed_at/2]).
 -export([behaviour_info/1]).
 -export([init/1, terminate/2, code_change/3, handle_call/3, handle_cast/2,
          handle_info/2]).
@@ -82,6 +83,12 @@ channels_terminated(Pid) ->
 
 close(Pid, Close, Timeout) ->
     gen_server:call(Pid, {command, {close, Close, Timeout}}, infinity).
+
+created_at(Pid, CreatedAt) ->
+	gen_server:call(Pid, {command, {created_at, CreatedAt}}, infinity).
+
+destroyed_at(Pid, DestroyedAt) ->
+	gen_server:call(Pid, {command, {destroyed_at, DestroyedAt}}, infinity).
 
 server_close(Pid, Close) ->
     gen_server:cast(Pid, {server_close, Close}).
@@ -242,6 +249,10 @@ i(Item, #state{module = Mod, module_state = MState}) -> Mod:i(Item, MState).
 %% Command handling
 %%---------------------------------------------------------------------------
 
+add_entity_to_dict({Key, Value}, State) ->
+	put(Key, Value),
+	{reply, ok, State}.
+
 handle_command({open_channel, ProposedNumber, Consumer}, _From,
                State = #state{channels_manager = ChMgr,
                               module = Mod,
@@ -249,6 +260,10 @@ handle_command({open_channel, ProposedNumber, Consumer}, _From,
     {reply, amqp_channels_manager:open_channel(ChMgr, ProposedNumber, Consumer,
                                                Mod:open_channel_args(MState)),
      State};
+handle_command({created_at, _} = Entity, _From, State) ->
+	add_entity_to_dict(Entity, State);
+handle_command({destroyed_at, _} = Entity, _From, State) ->
+	add_entity_to_dict(Entity, State);
 handle_command({close, #'connection.close'{} = Close, Timeout}, From, State) ->
     app_initiated_close(Close, From, Timeout, State).
 

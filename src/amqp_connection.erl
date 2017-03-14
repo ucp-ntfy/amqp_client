@@ -71,6 +71,7 @@
 
 -export([open_channel/1, open_channel/2, open_channel/3]).
 -export([start/1, close/1, close/2, close/3]).
+-export([created_at/2, destroyed_at/2]).
 -export([error_atom/1]).
 -export([info/2, info_keys/1, info_keys/0]).
 
@@ -266,6 +267,12 @@ close(ConnectionPid, Code, Text, Timeout) ->
                                 class_id   = 0,
                                 method_id  = 0},
     amqp_gen_connection:close(ConnectionPid, Close, Timeout).
+
+created_at(Conn, CreatedAt) ->
+	amqp_gen_connection:created_at(Conn, CreatedAt).
+
+destroyed_at(Conn, DestroyedAt) ->
+	amqp_gen_connection:destroyed_at(Conn, DestroyedAt).
 
 %%---------------------------------------------------------------------------
 %% Other functions

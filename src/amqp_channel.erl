@@ -128,10 +128,18 @@
 %% AMQP Channel API methods
 %%---------------------------------------------------------------------------
 
+get_call_timeout() ->
+	case application:get_env(amqp_client, call_timeout) of
+		undefined ->
+			5000;
+		Value ->
+			Value
+	end.
+
 %% @spec (Channel, Method) -> Result
 %% @doc This is equivalent to amqp_channel:call(Channel, Method, none).
 call(Channel, Method) ->
-    gen_server:call(Channel, {call, Method, none, self()}, infinity).
+    gen_server:call(Channel, {call, Method, none, self()}, get_call_timeout()).
 
 %% @spec (Channel, Method, Content) -> Result
 %% where
@@ -154,7 +162,7 @@ call(Channel, Method) ->
 %% the broker. It does not necessarily imply that the broker has
 %% accepted responsibility for the message.
 call(Channel, Method, Content) ->
-    gen_server:call(Channel, {call, Method, Content, self()}, infinity).
+    gen_server:call(Channel, {call, Method, Content, self()}, get_call_timeout()).
 
 %% @spec (Channel, Method) -> ok
 %% @doc This is equivalent to amqp_channel:cast(Channel, Method, none).

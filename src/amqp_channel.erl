@@ -66,7 +66,7 @@
 
 -behaviour(gen_server).
 
--export([call/2, call/3, cast/2, cast/3, cast_flow/3]).
+-export([call/2, call/3, call_timeout/3, cast/2, cast/3, cast_flow/3]).
 -export([close/1, close/3]).
 -export([register_return_handler/2, unregister_return_handler/1,
          register_flow_handler/2, unregister_flow_handler/1,
@@ -139,7 +139,10 @@ get_call_timeout() ->
 %% @spec (Channel, Method) -> Result
 %% @doc This is equivalent to amqp_channel:call(Channel, Method, none).
 call(Channel, Method) ->
-    gen_server:call(Channel, {call, Method, none, self()}, get_call_timeout()).
+    call_timeout(Channel, Method, get_call_timeout()).
+
+call_timeout(Channel, Method, Timeout) ->
+    gen_server:call(Channel, {call, Method, none, self()}, Timeout).
 
 %% @spec (Channel, Method, Content) -> Result
 %% where

@@ -650,7 +650,7 @@ handle_method_from_server(Method, Content, State = #state{closing = Closing}) ->
                         end,
                  if Drop -> ?LOG_INFO("Channel (~p): dropping method ~p from "
                                       "server because channel is closing~n",
-                                      [self(), {Method, Content}]),
+                                      [self(), Method]),
                             {noreply, State};
                     true -> handle_method_from_server1(Method,
                                                        amqp_msg(Content), State)
